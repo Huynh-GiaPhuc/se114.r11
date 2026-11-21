@@ -5,26 +5,42 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.smartnote.app.data.local.entity.NoteEntity
+import com.smartnote.app.data.local.entity.NoteWithDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM notes WHERE isDeleted = 0 ORDER BY isPinned DESC, timestamp DESC")
-    fun getAllActiveNotes(): Flow<List<NoteEntity>>
+    @Transaction
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 ORDER BY isPinned DESC, updatedAt DESC")
+    fun getAllActiveNotesWithDetails(): Flow<List<NoteWithDetails>>
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE id = :id")
-    fun getNoteById(id: Long): Flow<NoteEntity?>
+    fun getNoteByIdWithDetails(id: Long): Flow<NoteWithDetails?>
 
-    @Query("SELECT * FROM notes WHERE isFavorite = 1 AND isDeleted = 0 ORDER BY timestamp DESC")
-    fun getFavoriteNotes(): Flow<List<NoteEntity>>
+    @Transaction
+    @Query("SELECT * FROM notes WHERE isPinned = 1 AND isTrashed = 0 ORDER BY updatedAt DESC")
+    fun getPinnedNotesWithDetails(): Flow<List<NoteWithDetails>>
 
-    @Query("SELECT * FROM notes WHERE isDeleted = 1 ORDER BY timestamp DESC")
-    fun getDeletedNotes(): Flow<List<NoteEntity>>
+    @Transaction
+    @Query("SELECT * FROM notes WHERE isTrashed = 1 ORDER BY trashedAt DESC")
+    fun getTrashedNotesWithDetails(): Flow<List<NoteWithDetails>>
 
-    @Query("SELECT * FROM notes WHERE isDeleted = 0 AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY timestamp DESC")
-    fun searchNotes(query: String): Flow<List<NoteEntity>>
+    @Transaction
+    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND (title LIKE '%' || :query || '%' OR content LIKE '%' || :query || '%') ORDER BY updatedAt DESC")
+    fun searchNotesWithDetails(query: String): Flow<List<NoteWithDetails>>
+
+    @Transaction
+    @Query("""
+        SELECT notes.* FROM notes 
+        INNER JOIN note_category_cross_ref ON notes.id = note_category_cross_ref.noteId 
+        WHERE note_category_cross_ref.categoryId = :categoryId AND notes.isTrashed = 0 
+        ORDER BY notes.isPinned DESC, notes.updatedAt DESC
+    """)
+    fun getNotesByCategoryWithDetails(categoryId: Long): Flow<List<NoteWithDetails>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity): Long
@@ -35,9 +51,15 @@ interface NoteDao {
     @Delete
     suspend fun deleteNote(note: NoteEntity)
 
-    @Query("UPDATE notes SET isDeleted = 0 WHERE id = :id")
-    suspend fun restoreNote(id: Long)
+    @Query("UPDATE notes SET isTrashed = 1, trashedAt = :trashedAt WHERE id = :id")
+    suspend fun moveNoteToTrash(id: Long, trashedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE notes SET isTrashed = 0, trashedAt = NULL WHERE id = :id")
+    suspend fun restoreNoteFromTrash(id: Long)
 
     @Query("DELETE FROM notes WHERE id = :id")
     suspend fun deleteNotePermanently(id: Long)
+
+    @Query("DELETE FROM notes WHERE isTrashed = 1")
+    suspend fun emptyTrash()
 }

@@ -10,14 +10,13 @@ data class NoteEntity(
     val id: Long = 0,
     val title: String,
     val content: String,
-    val timestamp: Long,
-    val color: Int,
+    val colorHex: String,
     val isPinned: Boolean,
-    val isFavorite: Boolean,
-    val isArchived: Boolean,
-    val isDeleted: Boolean,
-    val tags: String,
-    val folderId: Long?
+    val isLocked: Boolean,
+    val isTrashed: Boolean,
+    val trashedAt: Long?,
+    val createdAt: Long,
+    val updatedAt: Long
 )
 
 fun NoteEntity.toDomainModel(): Note {
@@ -25,14 +24,13 @@ fun NoteEntity.toDomainModel(): Note {
         id = id,
         title = title,
         content = content,
-        timestamp = timestamp,
-        color = color,
+        colorHex = colorHex,
         isPinned = isPinned,
-        isFavorite = isFavorite,
-        isArchived = isArchived,
-        isDeleted = isDeleted,
-        tags = if (tags.isEmpty()) emptyList() else tags.split(","),
-        folderId = folderId
+        isLocked = isLocked,
+        isTrashed = isTrashed,
+        trashedAt = trashedAt,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
 
@@ -41,13 +39,12 @@ fun Note.toEntity(): NoteEntity {
         id = id,
         title = title,
         content = content,
-        timestamp = timestamp,
-        color = color,
+        colorHex = colorHex,
         isPinned = isPinned,
-        isFavorite = isFavorite,
-        isArchived = isArchived,
-        isDeleted = isDeleted,
-        tags = tags.joinToString(","),
-        folderId = folderId
+        isLocked = isLocked,
+        isTrashed = isTrashed,
+        trashedAt = trashedAt,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }

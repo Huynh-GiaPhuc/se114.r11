@@ -1,6 +1,8 @@
 package com.smartnote.app.di
 
+import com.smartnote.app.data.repository.CategoryRepositoryImpl
 import com.smartnote.app.data.repository.NoteRepositoryImpl
+import com.smartnote.app.domain.repository.CategoryRepository
 import com.smartnote.app.domain.repository.NoteRepository
 import dagger.Binds
 import dagger.Module
@@ -17,4 +19,10 @@ abstract class RepositoryModule {
     abstract fun bindNoteRepository(
         noteRepositoryImpl: NoteRepositoryImpl
     ): NoteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryRepository(
+        categoryRepositoryImpl: CategoryRepositoryImpl
+    ): CategoryRepository
 }

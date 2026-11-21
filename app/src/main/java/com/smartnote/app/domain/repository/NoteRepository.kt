@@ -1,17 +1,25 @@
 package com.smartnote.app.domain.repository
 
+import com.smartnote.app.domain.model.Attachment
 import com.smartnote.app.domain.model.Note
 import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
-    fun getAllNotes(): Flow<List<Note>>
+    fun getAllActiveNotes(): Flow<List<Note>>
     fun getNoteById(id: Long): Flow<Note?>
-    fun getFavoriteNotes(): Flow<List<Note>>
-    fun getDeletedNotes(): Flow<List<Note>>
+    fun getPinnedNotes(): Flow<List<Note>>
+    fun getTrashedNotes(): Flow<List<Note>>
     fun searchNotes(query: String): Flow<List<Note>>
-    suspend fun insertNote(note: Note): Long
-    suspend fun updateNote(note: Note)
-    suspend fun deleteNote(note: Note)
+    fun getNotesByCategory(categoryId: Long): Flow<List<Note>>
+    
+    suspend fun insertNote(note: Note, categoryIds: List<Long> = emptyList()): Long
+    suspend fun updateNote(note: Note, categoryIds: List<Long> = emptyList())
+    suspend fun moveNoteToTrash(id: Long)
     suspend fun restoreNote(id: Long)
     suspend fun deleteNotePermanently(id: Long)
+    suspend fun emptyTrash()
+    
+    suspend fun addAttachmentToNote(attachment: Attachment): Long
+    suspend fun deleteAttachment(attachment: Attachment)
+    fun getAttachmentsForNote(noteId: Long): Flow<List<Attachment>>
 }

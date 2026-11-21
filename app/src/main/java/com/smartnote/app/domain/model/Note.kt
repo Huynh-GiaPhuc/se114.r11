@@ -4,12 +4,13 @@ data class Note(
     val id: Long = 0,
     val title: String,
     val content: String,
-    val timestamp: Long = System.currentTimeMillis(),
-    val color: Int = 0xFFFFF59D.toInt(),
+    val colorHex: String = "#FFF59D",
     val isPinned: Boolean = false,
-    val isFavorite: Boolean = false,
-    val isArchived: Boolean = false,
-    val isDeleted: Boolean = false,
-    val tags: List<String> = emptyList(),
-    val folderId: Long? = null
+    val isLocked: Boolean = false,
+    val isTrashed: Boolean = false,
+    val trashedAt: Long? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val categories: List<Category> = emptyList(),
+    val attachments: List<Attachment> = emptyList()
 )
