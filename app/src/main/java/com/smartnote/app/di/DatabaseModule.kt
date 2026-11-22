@@ -6,11 +6,13 @@ import com.smartnote.app.data.local.dao.AttachmentDao
 import com.smartnote.app.data.local.dao.CategoryDao
 import com.smartnote.app.data.local.dao.NoteDao
 import com.smartnote.app.data.local.database.SmartNoteDatabase
+import com.smartnote.app.security.CryptoManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import net.zetetic.database.sqlcipher.SupportFactory
 import javax.inject.Singleton
 
 @Module
@@ -20,13 +22,20 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideSmartNoteDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        cryptoManager: CryptoManager
     ): SmartNoteDatabase {
+        val passphraseBytes = cryptoManager.getOrCreateDatabasePassphrase()
+        val factory = SupportFactory(passphraseBytes)
+
         return Room.databaseBuilder(
             context,
             SmartNoteDatabase::class.java,
             SmartNoteDatabase.DATABASE_NAME
-        ).fallbackToDestructiveMigration().build()
+        )
+            .openHelperFactory(factory)
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

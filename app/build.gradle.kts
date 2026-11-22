@@ -65,9 +65,11 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
-    // Security & Biometric
+    // Security, SQLCipher & Biometric
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
+    implementation(libs.sqlcipher)
+    implementation(libs.sqlite.ktx)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
